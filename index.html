@@ -1,0 +1,247 @@
+<html>
+<head>
+<title>LDA Topic Modelling in JS</title>
+<meta charset="utf-8">
+<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.21.custom.css" rel="stylesheet" />
+<link type="text/css" href="css/lda.css" rel="stylesheet" />
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.21.custom.min.js"></script>
+<script src="js/jquery.tagcanvas.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/stopwords.js"></script>
+<script type="text/javascript" src="js/lda.js"></script>
+<script type="text/javascript">
+SPARQL = function(o) {
+  this.query = function(q) {
+    return $.ajax({
+      url: o.endpoint,
+      accepts: {json: "application/sparql-results+json"},
+      data: {query: q, apikey: o.apikey},
+      dataType: "json"
+    });
+  };
+};
+</script>
+<script>
+
+var wikidataendpoint = new SPARQL({ 
+           apikey: "YOUR-API-KEY-HERE", 
+           endpoint: "https://query.wikidata.org/sparql"
+});
+
+  var endpoint = new SPARQL({ 
+           apikey: "YOUR-API-KEY-HERE", 
+           endpoint: "https://lov.linkeddata.es/dataset/lov/sparql"
+});
+
+
+  
+function topicise() {
+	//console.log("analysing "+sentences.length+" sentences...");
+	var documents = new Array();
+	var f = {};
+	var vocab=new Array();
+	var docCount=0;
+	for(var i=0;i<sentences.length;i++) {
+		if (sentences[i]=="") continue;
+		var words = sentences[i].split(/[\s,\"]+/);
+		if(!words) continue;
+		var wordIndices = new Array();
+		for(var wc=0;wc<words.length;wc++) {
+			var w=words[wc].toLowerCase().replace(/[^a-z\'A-Z0-9 ]+/g, '');
+			//TODO: Add stemming
+			if (w=="" || w.length==1 || stopwords[w] || w.indexOf("http")==0) continue;
+			if (f[w]) { 
+				f[w]=f[w]+1;			
+			} 
+			else if(w) { 
+				f[w]=1; 
+				vocab.push(w); 
+			};	
+			wordIndices.push(vocab.indexOf(w));
+		}
+		if (wordIndices && wordIndices.length>0) {
+			documents[docCount++] = wordIndices;
+		}
+	}
+		
+	var V = vocab.length;
+	var M = documents.length;
+	var K = parseInt($( "#topics" ).val());
+	var alpha = 0.1;  // per-document distributions over topics
+	var beta = .01;  // per-topic distributions over words
+
+	lda.configure(documents,V,10000, 2000, 100, 10);
+	lda.gibbs(K, alpha, beta);
+
+	var theta = lda.getTheta();
+	var phi = lda.getPhi();
+
+	var text = '';
+
+	//topics
+	var topTerms=20;
+    var topicText = new Array();
+    var queryValues = new Array();
+	for (var k = 0; k < phi.length; k++) {
+		text+='<canvas id="topic'+k+'" class="topicbox color'+k+'"><ul>';
+		var tuples = new Array();
+		for (var w = 0; w < phi[k].length; w++) {
+			 tuples.push(""+phi[k][w].toPrecision(2)+"_"+vocab[w]);
+		}
+		tuples.sort().reverse();
+		if(topTerms>vocab.length) topTerms=vocab.length;
+	    topicText[k]='';
+	    queryValues[k]='';
+		for (var t = 0; t < topTerms; t++) {
+			var topicTerm=tuples[t].split("_")[1];
+			var prob=parseInt(tuples[t].split("_")[0]*100);
+			if (prob<0.0001) continue;
+			text+=( '<li><a href="javascript:void(0);" data-weight="'+(prob)+'" title="'+prob+'%">'+topicTerm +'</a></li>' );			
+			console.log("topic "+k+": "+ topicTerm+" = " + prob  + "%");
+		        topicText[k] += ( topicTerm +" ");
+		        queryValues[k] += ( "\"" + topicTerm + "\" ");
+		}
+		text+='</ul></canvas>';
+	}
+	$('#topiccloud').html(text);
+
+    for (var v=0; v<queryValues.length; v++){
+	var query="SELECT * { values ?word { " + queryValues[v] +" } ?voc a <http://purl.org/vocommons/voaf#Vocabulary> . ?voc <http://purl.org/dc/terms/description> ?description . filter ( contains ( str(?description),?word))}";
+	console.log(query);
+	endpoint.query(query).done(onSuccessMember);
+    }
+    
+	text='<div class="spacer"> </div>';
+	//highlight sentences	
+	for (var m = 0; m < theta.length; m++) {
+		text+='<div class="lines">';
+		text+='<div style="display:table-cell;width:100px;padding-right:5px">';
+		for (var k = 0; k < theta[m].length; k++) {
+			text+=('<div class="box bgcolor'+k+'" style="width:'+parseInt(""+(theta[m][k]*100))+'px" title="'+topicText[k]+'"></div>');
+		}
+		text+='</div>'+sentences[m]+'</div>';
+	}
+	$("#output").html(text);
+	
+	for (var k = 0; k < phi.length; k++) {
+		if(!$('#topic'+k).tagcanvas({
+		      textColour: $('#topic'+k).css('color'),
+			  maxSpeed: 0.05,
+			 initial: [(Math.random()>0.5 ? 1: -1) *Math.random()/2,(Math.random()>0.5 ? 1: -1) *Math.random()/2],  //[0.1,-0.1],
+			  decel: 0.98,
+			  reverse: true,
+			  weightSize:10,
+			  weightMode:'size',
+			  weightFrom:'data-weight',
+			  weight: true
+			}))	
+		{
+			$('#topic'+k).hide();
+		} else {
+			//TagCanvas.Start('topic'+k);
+		}
+	}
+}
+
+function sleep(delay) {
+    var start = new Date().getTime();
+    while (new Date().getTime() < start + delay);
+}  
+  function onSuccessMember(json) {
+        var html = "<table border='1' id='t01'>";
+        html += "<tr>";
+	html += "<thead><tr><th>Word</th><th>Vocabulary</th><th>Description</th></tr></thead>";
+	html += "<tbody>";
+        for (var b in json.results.bindings) {
+	    var word = json.results.bindings[b][json.head.vars[0]];
+	    var voc = json.results.bindings[b][json.head.vars[1]];
+	    var description = json.results.bindings[b][json.head.vars[2]];
+	    html += "<tr><td>"+word.value+"</td><td>"+voc.value+"</td><td>"+description.value+"</td></tr>";
+        }
+	html += "</tbody>";
+        html += "</table>";
+        //return html;
+        document.getElementById("result-member").innerHTML += html;
+    }
+  //var query1="select distinct ?s ?p where { ?s ?p ?o . } limit 2";
+  //var query="SELECT * { values ?word { \"baggage\" \"airport\" \"airline\" \"workers\" \"missing\" } ?voc a <http://purl.org/vocommons/voaf#Vocabulary> . ?voc <http://purl.org/dc/terms/description> ?description . filter ( contains ( str(?description),?word))}";
+  //var query2="select distinct ?s ?p where { ?s ?p ?o . } limit 10";
+  //function fillResult () { document.getElementById("result-member").innerHTML = "<p>foo</p>"; } //endpoint.query(query1).done(onSuccessMember) + "<br>" + endpoint.query(query2).done(onSuccessMember);
+  //fillResult();
+  //endpoint.query(query).done(onSuccessMember);
+  //endpoint.query(query2).done(onSuccessMember);
+  
+$(document).ready(function(){
+	var select = $( "#topics" );
+	var slider = $( "<div id='slider'></div>" ).insertAfter( select ).slider({
+		min: 2,
+		max: 10,
+		range: "min",
+		value: select[0].selectedIndex+2,
+		slide: function( event, ui ) {
+			select[0].selectedIndex = ui.value-2;
+		}
+	});
+	$( "#topics" ).change(function() {
+		slider.slider( "value", this.selectedIndex + 2 );
+	});
+});
+
+function btnTopiciseClicked() {
+	$('#btnTopicise').attr('disabled','disabled');
+	sentences = $('#text').val().split("\n");
+	topicise();
+	$('#btnTopicise').removeAttr('disabled');
+
+	
+}
+
+var sentences;
+</script>
+
+</head>
+<body>
+<div id="titletxt">LDA-Based Topic Modelling in Javascript</div>
+<div id="titledesc"><p>Topic modelling means detecting “abstract” topics from a collection of text documents. The most common text book technique to do that is using Latent Dirichlet Allocation. Simply put, LDA is a statistical algorithm which takes documents as input and produces a list of topics. One catch is that you have to tell it how many topics you want. There’s much more to it but since this is not a tutorial post, I will stop here. (If you are interested in how it works, read the references given on the wiki page.)</p>
+<p>Each topic is represented as a word cloud; the larger a word, the more weight it has in the topic. The source sentences are displayed again with a bar which shows the percentage distribution of topics for that sentence. Hovering on each area in the bar would show you the words in the topic. You can of course replace it with anyother text, change the number of topics using the slider, and press the 'Analyse' button to see it work.  </p></div>
+<textarea id="text" cols="80" rows="10">
+Susan Golden and her husband Gary, of Nassau County, have been missing their luggage for nearly two weeks.
+Their bags — with Apple AirTag tracking devices — sit with hundreds of others at Paris Charles de Gaulle Airport. The couple got on an Air France connecting flight to JFK Airport on July 1 but their luggage did not. 
+"How are they allowed to continue to fly every day and more luggage is piling up?" she said.
+A Facebook group has over 100 other members also missing their baggage. 
+The airline posted an apology on its website. In a statement to Fox 5, a spokesperson cited a strike by some airport workers in charge of baggage handling and said the airline is working to make sure the situation rapidly returns to normal
+This is hardly the only issue plaguing air travel these days.
+"It's all over staffing — whether it's pilots, flight attendants, baggage handlers to keep up with the demand," said Clint Henderson, the managing editor for news at The Points Guy.
+Travel experts say the meltdown is due to staff shortages coupled with more people traveling this summer after being pent-up during the COVID-19 pandemic. The experts offer some advice.
+"You only want to have a carry-on with you," Frommer's Guidebooks editorial director Pauline Frommer said. "You want to fly on the first flight of the day — that way you know the plane you're flying on, and your crew, was at the airport overnight."
+Just under 700,000 bags were mishandled in the first quarter of this year, according to data from Air Travel Consumer Reports. Break it down, and that's roughly seven out of every 1,000 bags. 
+But the Goldens say their bags aren't lost; they're being held hostage.
+"Our bags are bargaining chips between the union workers and airport to negotiate a contract," Gary said.
+Air France said all baggage is expected to be delivered in the coming days.
+If flying with just a carry-on isn't for you, don't check your bag more than three hours before takeoff to avoid your luggage going into a holding area. Now more so than ever before, be sure to pack your patience.
+</textarea><br/>
+<div id="menu">
+<label for="topics">Topics:</label>
+<select name="topics" id="topics">
+	<option>2</option>
+	<option>3</option>
+	<option  selected="selected">4</option>
+	<option>5</option>
+	<option>6</option>
+	<option>7</option>
+	<option>8</option>
+	<option>9</option>
+	<option>10</option>
+</select><br/><input id="btnTopicise" type="button" onclick="btnTopiciseClicked();" value="Analyse"/><br/>
+</div>
+<div class="spacer"> </div>
+<div id="topiccloud"></div>
+<br/>
+<div id="output">
+</div>
+
+<div id="result-member">
+</div>
+
+</body>
+</html>
