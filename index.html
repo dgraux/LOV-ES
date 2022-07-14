@@ -148,7 +148,7 @@ function sleep(delay) {
     while (new Date().getTime() < start + delay);
 }  
   function onSuccessMember(json) {
-        var html = "<table border='1' id='t01'>";
+      var html = "<table border='1' id='t01'>";
         html += "<tr>";
 	html += "<thead><tr><th>Word</th><th>Vocabulary</th><th>Description</th></tr></thead>";
 	html += "<tbody>";
@@ -199,14 +199,150 @@ function btnTopiciseClicked() {
 var sentences;
 </script>
 
+    <style>
+	body {
+	    margin: 20px 50px;
+	}
+
+	p {
+	    margin: 20px 20px;
+	    text-align: justify;
+	    text-justify: inter-word;
+	}
+
+	code {
+	    background: #F1F1F1;
+	}
+
+	a:link,
+	a:visited {
+	    color: blue;
+	    background-color: transparent;
+	    text-decoration: none;
+	}
+
+	a:hover {
+	    color: red;
+	    background-color: transparent;
+	    text-decoration: underline;
+	}
+
+	.header {
+	    border-radius: 15px;
+	    padding: 20px;
+	    text-align: center;
+	    background-color: rgb(75, 125, 190);
+	    color: white;
+	}
+
+	.column {
+	    float: left;
+	}
+
+	/* Middle column */
+	.column.middle {
+	    width: 25%;
+	}
+
+	/* Left column */
+	.column.left {
+	    width: 30%;
+	}
+
+	/* Right column */
+	.column.right {
+	    width: 45%;
+	}
+
+	/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+	@media screen and (max-width: 600px) {
+	    .column.left,
+	    .column.middle,
+	    .column.right {
+		width: 100%;
+	    }
+	}
+
+	.row:after {
+	    content: "";
+	    display: table;
+	    clear: both;
+	}
+
+	.page-header {
+	    border-radius: 6px;
+	    padding: 5px 15px;
+	    margin-top: 10px;
+	    margin-bottom: 10px;
+	    margin-right: 10px;
+	}
+
+	h1.page-header {
+	    background-color: rgb(75, 125, 190);
+	    color: white;
+	}
+
+	h2.page-header {
+	    background-color: rgb(218, 229, 241);
+	}
+
+	h3.page-header {
+	    background-color: rgb(238, 238, 238);
+	}
+
+	.footer {
+	    background-color: #F1F1F1;
+	    text-align: center;
+	    padding: 10px;
+	}
+
+	table {
+	    width: 98%;
+	    margin-left: auto;
+	    margin-right: auto;
+	}
+
+	table,
+	th,
+	td {
+	    border: 1px solid black;
+	    border-collapse: collapse;
+	}
+
+	th,
+	td {
+	    padding: 5px;
+	    text-align: left;
+	}
+
+	table#t01 tr:nth-child(even) {
+	    background-color: rgb(238, 238, 238);
+	}
+
+	table#t01 tr:nth-child(odd) {
+	    background-color: transparent;
+	}
+
+	table#t01 th {
+	    background-color: rgb(218, 229, 241);
+	    color: black;
+	}
+    </style>
+
 </head>
 
 
 <body>
-<div id="titletxt">LDA-Based Topic Modelling in Javascript</div>
-<div id="titledesc"><p>Topic modelling means detecting “abstract” topics from a collection of text documents. The most common text book technique to do that is using Latent Dirichlet Allocation. Simply put, LDA is a statistical algorithm which takes documents as input and produces a list of topics. One catch is that you have to tell it how many topics you want. There’s much more to it but since this is not a tutorial post, I will stop here. (If you are interested in how it works, read the references given on the wiki page.)</p>
-<p>Each topic is represented as a word cloud; the larger a word, the more weight it has in the topic. The source sentences are displayed again with a bar which shows the percentage distribution of topics for that sentence. Hovering on each area in the bar would show you the words in the topic. You can of course replace it with anyother text, change the number of topics using the slider, and press the 'Analyse' button to see it work.  </p></div>
-<textarea id="text" cols="80" rows="10">
+
+    <div class="header">
+      <h1>LOV-ES</h1>
+      <h2>~Guessing potential RDF vocabularies from natural language texts using LDA~</h2>
+    </div>
+
+    <div class="row">
+      <div class="column left">
+	<h2 class="page-header">Text to be structured</h2>
+	<textarea id="text" cols="50" rows="30" >
 Susan Golden and her husband Gary, of Nassau County, have been missing their luggage for nearly two weeks.
 Their bags — with Apple AirTag tracking devices — sit with hundreds of others at Paris Charles de Gaulle Airport. The couple got on an Air France connecting flight to JFK Airport on July 1 but their luggage did not. 
 "How are they allowed to continue to fly every day and more luggage is piling up?" she said.
@@ -221,29 +357,57 @@ But the Goldens say their bags aren't lost; they're being held hostage.
 "Our bags are bargaining chips between the union workers and airport to negotiate a contract," Gary said.
 Air France said all baggage is expected to be delivered in the coming days.
 If flying with just a carry-on isn't for you, don't check your bag more than three hours before takeoff to avoid your luggage going into a holding area. Now more so than ever before, be sure to pack your patience.
-</textarea><br/>
-<div id="menu">
-<label for="topics">Topics:</label>
-<select name="topics" id="topics">
-	<option>2</option>
-	<option>3</option>
-	<option  selected="selected">4</option>
-	<option>5</option>
-	<option>6</option>
-	<option>7</option>
-	<option>8</option>
-	<option>9</option>
-	<option>10</option>
-</select><br/><input id="btnTopicise" type="button" onclick="btnTopiciseClicked();" value="Analyse"/><br/>
-</div>
-<div class="spacer"> </div>
-<div id="topiccloud"></div>
-<br/>
-<div id="output">
-</div>
+	</textarea><br/>
+	<div id="menu">
+	  <label for="topics">Topics:</label>
+	  <select name="topics" id="topics">
+	    <option>2</option>
+	    <option selected="selected">3</option>
+	    <option>4</option>
+	    <option>5</option>
+	    <option>6</option>
+	    <option>7</option>
+	    <option>8</option>
+	    <option>9</option>
+	    <option>10</option>
+	  </select><br/><input id="btnTopicise" type="button" onclick="btnTopiciseClicked();" value="Analyse"/><br/>
+	</div>
 
-<div id="result-member">
-</div>
+	
+      </div>
+      
+      <div class="column middle">
+	<h2 class="page-header">Topics using LDA</h2>
+
+
+	<div class="spacer"> </div>
+	<div id="topiccloud"></div>
+	<br/>
+	<div id="output">
+	</div>
+	
+      </div>
+
+      <div class="column right">
+	<h2 class="page-header">Candidate Vocabularies from LOV</h2>
+	<div id="result-member">
+	</div>
+      </div>
+    </div>
+    
+    <br/>
+    <br/>
+
+    <footer>
+      <hr/>
+      <div class="footer">
+	Last update: July 2022
+      </div>
+    </footer>
+  
+<div id="titletxt">LDA-Based Topic Modelling in Javascript</div>
+<div id="titledesc"><p>Topic modelling means detecting “abstract” topics from a collection of text documents. The most common text book technique to do that is using Latent Dirichlet Allocation. Simply put, LDA is a statistical algorithm which takes documents as input and produces a list of topics. One catch is that you have to tell it how many topics you want. There’s much more to it but since this is not a tutorial post, I will stop here. (If you are interested in how it works, read the references given on the wiki page.)</p>
+<p>Each topic is represented as a word cloud; the larger a word, the more weight it has in the topic. The source sentences are displayed again with a bar which shows the percentage distribution of topics for that sentence. Hovering on each area in the bar would show you the words in the topic. You can of course replace it with anyother text, change the number of topics using the slider, and press the 'Analyse' button to see it work.  </p></div>
 
 </body>
 </html>
