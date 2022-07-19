@@ -36,7 +36,6 @@ var wikidataendpoint = new SPARQL({
 
   
 function topicise() {
-	//console.log("analysing "+sentences.length+" sentences...");
 	var documents = new Array();
 	var f = {};
 	var vocab=new Array();
@@ -80,8 +79,8 @@ function topicise() {
 
 	//topics
 	var topTerms=20;
-    var topicText = new Array();
-    var queryValues = new Array();
+        var topicText = new Array();
+        var queryValues = new Array();
 	for (var k = 0; k < phi.length; k++) {
 		text+='<canvas id="topic'+k+'" class="topicbox color'+k+'"><ul>';
 		var tuples = new Array();
@@ -160,7 +159,7 @@ function sleep(delay) {
         }
 	html += "</tbody>";
         html += "</table>";
-        //return html;
+        
         document.getElementById("result-member").innerHTML += html;
     }
   //var query1="select distinct ?s ?p where { ?s ?p ?o . } limit 2";
@@ -405,9 +404,6 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
       </div>
     </footer>
   
-<div id="titletxt">LDA-Based Topic Modelling in Javascript</div>
-<div id="titledesc"><p>Topic modelling means detecting “abstract” topics from a collection of text documents. The most common text book technique to do that is using Latent Dirichlet Allocation. Simply put, LDA is a statistical algorithm which takes documents as input and produces a list of topics. One catch is that you have to tell it how many topics you want. There’s much more to it but since this is not a tutorial post, I will stop here. (If you are interested in how it works, read the references given on the wiki page.)</p>
-<p>Each topic is represented as a word cloud; the larger a word, the more weight it has in the topic. The source sentences are displayed again with a bar which shows the percentage distribution of topics for that sentence. Hovering on each area in the bar would show you the words in the topic. You can of course replace it with anyother text, change the number of topics using the slider, and press the 'Analyse' button to see it work.  </p></div>
 
 </body>
 </html>
