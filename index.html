@@ -90,7 +90,7 @@ function topicise() {
 		tuples.sort().reverse();
 		if(topTerms>vocab.length) topTerms=vocab.length;
 	    topicText[k]='';
-	    queryValues[k]='';
+	    queryValues[k]=''; // This contains 3-tuples: (topicId word weight)
 		for (var t = 0; t < topTerms; t++) {
 			var topicTerm=tuples[t].split("_")[1];
 			var prob=parseInt(tuples[t].split("_")[0]*100);
@@ -98,14 +98,14 @@ function topicise() {
 			text+=( '<li><a href="javascript:void(0);" data-weight="'+(prob)+'" title="'+prob+'%">'+topicTerm +'</a></li>' );			
 			console.log("topic "+k+": "+ topicTerm+" = " + prob  + "%");
 		        topicText[k] += ( topicTerm +" ");
-		        queryValues[k] += ( "\"" + topicTerm + "\" ");
+		        queryValues[k] += ( "(\"" + k + "\" \"" + topicTerm + "\" \"" + prob + "\") ");
 		}
 		text+='</ul></canvas>';
 	}
 	$('#topiccloud').html(text);
 
     for (var v=0; v<queryValues.length; v++){
-	var query="SELECT * { values ?word { " + queryValues[v] +" } ?voc a <http://purl.org/vocommons/voaf#Vocabulary> . ?voc <http://purl.org/dc/terms/description> ?description . filter ( contains ( str(?description),?word))}";
+	var query="SELECT distinct ?topicid ?word ?weight ?voc WHERE { values (?topicid ?word ?weight) { " + queryValues[v] +" } ?voc a <http://purl.org/vocommons/voaf#Vocabulary> . ?voc <http://purl.org/dc/terms/description> ?description . filter ( contains ( str(?description),?word))}";
 	console.log(query);
 	endpoint.query(query).done(onSuccessMember);
     }
@@ -149,13 +149,14 @@ function sleep(delay) {
   function onSuccessMember(json) {
       var html = "<table border='1' id='t01'>";
         html += "<tr>";
-	html += "<thead><tr><th>Word</th><th>Vocabulary</th><th>Description</th></tr></thead>";
+	html += "<thead><tr><th>Topic Id</th><th>Word</th><th>Weight</th><th>Voc Id</th></tr></thead>";
 	html += "<tbody>";
         for (var b in json.results.bindings) {
-	    var word = json.results.bindings[b][json.head.vars[0]];
-	    var voc = json.results.bindings[b][json.head.vars[1]];
-	    var description = json.results.bindings[b][json.head.vars[2]];
-	    html += "<tr><td>"+word.value+"</td><td>"+voc.value+"</td><td>"+description.value+"</td></tr>";
+	    var topicid = json.results.bindings[b][json.head.vars[0]];
+	    var word = json.results.bindings[b][json.head.vars[1]];
+	    var weight = json.results.bindings[b][json.head.vars[2]];
+	    var voc = json.results.bindings[b][json.head.vars[3]];
+	    html += "<tr><td>"+topicid.value+"</td><td>"+word.value+"</td><td>"+weight.value+"</td><td>"+voc.value+"</td></tr>";
         }
 	html += "</tbody>";
         html += "</table>";
