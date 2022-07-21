@@ -13,7 +13,7 @@
 SPARQL = function(o) {
   this.query = function(q) {
     return $.ajax({
-      url: o.endpoint,
+	url: o.endpoint,
       accepts: {json: "application/sparql-results+json"},
       data: {query: q, apikey: o.apikey},
       dataType: "json"
@@ -33,6 +33,101 @@ var wikidataendpoint = new SPARQL({
            endpoint: "https://lov.linkeddata.es/dataset/lov/sparql"
 });
 
+  function onSuccessMember(json) {
+      //}
+      //
+      //  function sortTopic(json) {
+
+      // List the topic ids.
+      var topicArray = Array.from(new Set(json.results.bindings.map(item => item[json.head.vars[0]].value)));
+      console.log(topicArray.length);
+      console.log(topicArray);
+      // Loop over the topic ids.
+      //for (var t in topicArray) {
+	  // Count the total weights in this topic.
+          //var totalWeight = new Array(topicArray.length).fill(0); //Object();
+	  //for (var a in json.results.bindings) {
+	      //if (json.results.bindings[a][json.head.vars[0]].value == t){
+		  //if (typeof totalWeight[t] == 'undefined') { totalWeight[t]=0 ; }
+		  //totalWeight[json.results.bindings[a][json.head.vars[0]].value] += parseInt(json.results.bindings[a][json.head.vars[2]].value);
+	      //}
+      //}
+	  console.log("++++++++++++++++++++++++++++++++++++++");
+	  //console.log("Topic: "+ t + " has total weight: " + totalWeight[t]);
+      //}
+      //console.log(totalWeight);
+      
+      // Sum the weights for each voc by topic
+      var totalWeight = new Array(topicArray.length).fill(0);
+      var infoArray = new Object();
+      var sumOfWeightByTopic = new Object();
+      for (var b in json.results.bindings) {
+	  totalWeight[json.results.bindings[b][json.head.vars[0]].value] += parseInt(json.results.bindings[b][json.head.vars[2]].value) ;
+	  infoArray[json.results.bindings[b][json.head.vars[3]].value] = json.results.bindings[b][json.head.vars[4]].value ;
+	  if (typeof sumOfWeightByTopic[json.results.bindings[b][json.head.vars[3]].value] == 'undefined') {
+	      sumOfWeightByTopic[json.results.bindings[b][json.head.vars[3]].value] = new Array(topicArray.length).fill(0) ;
+	  }
+	  sumOfWeightByTopic[json.results.bindings[b][json.head.vars[3]].value][json.results.bindings[b][json.head.vars[0]].value] += parseInt(json.results.bindings[b][json.head.vars[2]].value);
+      }
+      console.log(totalWeight);
+      var aggregatedWeight = new Object();
+      for (var key in sumOfWeightByTopic) {
+	  aggregatedWeight[key] = 0 ;
+	  for (var topic in topicArray) {
+	      aggregatedWeight[key] += sumOfWeightByTopic[key][topic]/totalWeight[topic];
+	      //console.log(key + ", " + topic + " = " + sumOfWeightByTopic[key][topic] + '');
+	  }
+	  //console.log(key + ":" + aggregatedWeight[key]);// + "," +sumOfWeightByTopic[key][1] + "||" + sumOfWeightByTopic[key][0]/totalWeight[0] + "," + sumOfWeightByTopic[key][1]/totalWeight[1]);
+      }
+      // Sorting the voc by their aggregatedWeight
+      let sortable = [];
+      for (var voc in aggregatedWeight) {
+	  sortable.push([voc, aggregatedWeight[voc]]);
+      }
+      var sortedResults=sortable.sort(function (a,b) { return b[1] - a[1]; });
+      console.log(sortedResults);
+      console.log("=========================================");
+
+  
+      // HTML rendering of the computed results.
+      var html = "<table border='1' id='t01'>";
+      html += "<tr>";
+      //html += "<thead><tr><th>Topic Id</th><th>Word</th><th>Weight</th><th>Voc Id</th></tr></thead>";
+      html += "<thead><tr><th>Score</th><th>Vocabulary [Location]</th></tr></thead>";
+      html += "<tbody>";
+      for (var voc in sortedResults) {
+	  //var topicid = json.results.bindings[b][json.head.vars[0]];
+	  //var word = json.results.bindings[b][json.head.vars[1]];
+	  //var weight = json.results.bindings[b][json.head.vars[2]];
+	  //var voc = json.results.bindings[b][json.head.vars[3]];
+	  html += "<tr><td>"+sortedResults[voc][1]+"</td><td>"+sortedResults[voc][0]+"<br>["+infoArray[sortedResults[voc][0]]+"]</td></tr>";
+      }
+      html += "</tbody>";
+      html += "</table>";
+      
+      document.getElementById("result-member").innerHTML = html;
+      
+      // Count the total weights in this topic.
+      //var totalWeight=0;
+      //for (var a in json.results.bindings) {
+      //totalWeight += parseInt(json.results.bindings[a][json.head.vars[2]].value);
+      //}
+      //console.log("Topic: "+ json.results.bindings[0][json.head.vars[0]].value + " has total weight: " + totalWeight);
+      
+      //var sortArray = new Object();
+      //var sortArray = []; //new Array(0).fill(0);
+      //for (var b in json.results.bindings) {
+	  //console.log("b: "+b+" voc: "+json.results.bindings[b][json.head.vars[3]].value+" weight: "+ parseInt(json.results.bindings[b][json.head.vars[2]].value))
+	  //if (typeof sortArray[json.results.bindings[b][json.head.vars[3]].value] == 'undefined') { sortArray[json.results.bindings[b][json.head.vars[3]].value] = 0 ; }
+	  //sortArray[json.results.bindings[b][json.head.vars[3]].value] += parseInt(json.results.bindings[b][json.head.vars[2]].value);
+      //}
+      //for (var key in sortArray) {
+	  //sortArray[key] = sortArray[key]/totalWeight;
+	  //console.log(key + " = " + sortArray[key] + '');
+      //}
+      //console.log("=========================================");
+      //return sortArray ;      
+  }
 
   
 function topicise() {
@@ -96,7 +191,7 @@ function topicise() {
 			var prob=parseInt(tuples[t].split("_")[0]*100);
 			if (prob<0.0001) continue;
 			text+=( '<li><a href="javascript:void(0);" data-weight="'+(prob)+'" title="'+prob+'%">'+topicTerm +'</a></li>' );			
-			console.log("topic "+k+": "+ topicTerm+" = " + prob  + "%");
+			//console.log("topic "+k+": "+ topicTerm+" = " + prob  + "%");
 		        topicText[k] += ( topicTerm +" ");
 		        queryValues[k] += ( "(\"" + k + "\" \"" + topicTerm + "\" \"" + prob + "\") ");
 		}
@@ -104,11 +199,24 @@ function topicise() {
 	}
 	$('#topiccloud').html(text);
 
+    var sortedResults = [];
+    var query="SELECT distinct ?topicid ?word ?weight ?voc ?location WHERE { values (?topicid ?word ?weight) { ";
     for (var v=0; v<queryValues.length; v++){
-	var query="SELECT distinct ?topicid ?word ?weight ?voc WHERE { values (?topicid ?word ?weight) { " + queryValues[v] +" } ?voc a <http://purl.org/vocommons/voaf#Vocabulary> . ?voc <http://purl.org/dc/terms/description> ?description . filter ( contains ( str(?description),?word))}";
-	console.log(query);
-	endpoint.query(query).done(onSuccessMember);
+	query += queryValues[v] + " ";
     }
+    query += " } ?voc a <http://purl.org/vocommons/voaf#Vocabulary> . ?voc <http://purl.org/dc/terms/description> ?description . ?voc <http://www.w3.org/ns/dcat#distribution> ?location . filter ( contains ( str(?description),?word))}";
+    console.log(query);
+    endpoint.query(query).done(onSuccessMember);
+    //var results=endpoint.query(query);
+    //results.done(onSuccessMember); // To print the table
+    //sortedResults = [].concat(sortedResults,results.done(sortTopic));
+    //var resultsss=results.done(sortTopic);
+    //console.log(resultsss);
+    //for (var key in resultsss) {
+    //    console.log(key + " = " + resultsss[key] + '');
+    //}
+
+
     
 	text='<div class="spacer"> </div>';
 	//highlight sentences	
@@ -145,31 +253,7 @@ function topicise() {
 function sleep(delay) {
     var start = new Date().getTime();
     while (new Date().getTime() < start + delay);
-}  
-  function onSuccessMember(json) {
-      var html = "<table border='1' id='t01'>";
-        html += "<tr>";
-	html += "<thead><tr><th>Topic Id</th><th>Word</th><th>Weight</th><th>Voc Id</th></tr></thead>";
-	html += "<tbody>";
-        for (var b in json.results.bindings) {
-	    var topicid = json.results.bindings[b][json.head.vars[0]];
-	    var word = json.results.bindings[b][json.head.vars[1]];
-	    var weight = json.results.bindings[b][json.head.vars[2]];
-	    var voc = json.results.bindings[b][json.head.vars[3]];
-	    html += "<tr><td>"+topicid.value+"</td><td>"+word.value+"</td><td>"+weight.value+"</td><td>"+voc.value+"</td></tr>";
-        }
-	html += "</tbody>";
-        html += "</table>";
-        
-        document.getElementById("result-member").innerHTML += html;
-    }
-  //var query1="select distinct ?s ?p where { ?s ?p ?o . } limit 2";
-  //var query="SELECT * { values ?word { \"baggage\" \"airport\" \"airline\" \"workers\" \"missing\" } ?voc a <http://purl.org/vocommons/voaf#Vocabulary> . ?voc <http://purl.org/dc/terms/description> ?description . filter ( contains ( str(?description),?word))}";
-  //var query2="select distinct ?s ?p where { ?s ?p ?o . } limit 10";
-  //function fillResult () { document.getElementById("result-member").innerHTML = "<p>foo</p>"; } //endpoint.query(query1).done(onSuccessMember) + "<br>" + endpoint.query(query2).done(onSuccessMember);
-  //fillResult();
-  //endpoint.query(query).done(onSuccessMember);
-  //endpoint.query(query2).done(onSuccessMember);
+}
   
 $(document).ready(function(){
 	var select = $( "#topics" );
