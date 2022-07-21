@@ -34,30 +34,16 @@ var wikidataendpoint = new SPARQL({
 });
 
   function onSuccessMember(json) {
-      //}
-      //
-      //  function sortTopic(json) {
-
       // List the topic ids.
       var topicArray = Array.from(new Set(json.results.bindings.map(item => item[json.head.vars[0]].value)));
       console.log(topicArray.length);
       console.log(topicArray);
-      // Loop over the topic ids.
-      //for (var t in topicArray) {
-	  // Count the total weights in this topic.
-          //var totalWeight = new Array(topicArray.length).fill(0); //Object();
-	  //for (var a in json.results.bindings) {
-	      //if (json.results.bindings[a][json.head.vars[0]].value == t){
-		  //if (typeof totalWeight[t] == 'undefined') { totalWeight[t]=0 ; }
-		  //totalWeight[json.results.bindings[a][json.head.vars[0]].value] += parseInt(json.results.bindings[a][json.head.vars[2]].value);
-	      //}
-      //}
-	  console.log("++++++++++++++++++++++++++++++++++++++");
-	  //console.log("Topic: "+ t + " has total weight: " + totalWeight[t]);
-      //}
-      //console.log(totalWeight);
+
+      console.log("++++++++++++++++++++++++++++++++++++++");
       
-      // Sum the weights for each voc by topic
+      // Count the total weights for each topic
+      // Sum the weight per topic per vocabulary
+      // Collect the location for each vocabulary
       var totalWeight = new Array(topicArray.length).fill(0);
       var infoArray = new Object();
       var sumOfWeightByTopic = new Object();
@@ -70,14 +56,13 @@ var wikidataendpoint = new SPARQL({
 	  sumOfWeightByTopic[json.results.bindings[b][json.head.vars[3]].value][json.results.bindings[b][json.head.vars[0]].value] += parseInt(json.results.bindings[b][json.head.vars[2]].value);
       }
       console.log(totalWeight);
+      // Aggregated the weights (sum per topic) for each vocabulary
       var aggregatedWeight = new Object();
       for (var key in sumOfWeightByTopic) {
 	  aggregatedWeight[key] = 0 ;
 	  for (var topic in topicArray) {
 	      aggregatedWeight[key] += sumOfWeightByTopic[key][topic]/totalWeight[topic];
-	      //console.log(key + ", " + topic + " = " + sumOfWeightByTopic[key][topic] + '');
 	  }
-	  //console.log(key + ":" + aggregatedWeight[key]);// + "," +sumOfWeightByTopic[key][1] + "||" + sumOfWeightByTopic[key][0]/totalWeight[0] + "," + sumOfWeightByTopic[key][1]/totalWeight[1]);
       }
       // Sorting the voc by their aggregatedWeight
       let sortable = [];
@@ -91,42 +76,16 @@ var wikidataendpoint = new SPARQL({
   
       // HTML rendering of the computed results.
       var html = "<table border='1' id='t01'>";
-      html += "<tr>";
-      //html += "<thead><tr><th>Topic Id</th><th>Word</th><th>Weight</th><th>Voc Id</th></tr></thead>";
-      html += "<thead><tr><th>Score</th><th>Vocabulary [Location]</th></tr></thead>";
+      //html += "<tr>";
+      html += "<thead><tr><th>Score</th><th>Vocabulary<br>[Location]</th></tr></thead>";
       html += "<tbody>";
       for (var voc in sortedResults) {
-	  //var topicid = json.results.bindings[b][json.head.vars[0]];
-	  //var word = json.results.bindings[b][json.head.vars[1]];
-	  //var weight = json.results.bindings[b][json.head.vars[2]];
-	  //var voc = json.results.bindings[b][json.head.vars[3]];
-	  html += "<tr><td>"+sortedResults[voc][1]+"</td><td>"+sortedResults[voc][0]+"<br>["+infoArray[sortedResults[voc][0]]+"]</td></tr>";
+	  html += "<tr><td>"+Math.floor(sortedResults[voc][1]*100)+"</td><td>"+sortedResults[voc][0]+"<br>["+infoArray[sortedResults[voc][0]]+"]</td></tr>";
       }
       html += "</tbody>";
       html += "</table>";
-      
       document.getElementById("result-member").innerHTML = html;
       
-      // Count the total weights in this topic.
-      //var totalWeight=0;
-      //for (var a in json.results.bindings) {
-      //totalWeight += parseInt(json.results.bindings[a][json.head.vars[2]].value);
-      //}
-      //console.log("Topic: "+ json.results.bindings[0][json.head.vars[0]].value + " has total weight: " + totalWeight);
-      
-      //var sortArray = new Object();
-      //var sortArray = []; //new Array(0).fill(0);
-      //for (var b in json.results.bindings) {
-	  //console.log("b: "+b+" voc: "+json.results.bindings[b][json.head.vars[3]].value+" weight: "+ parseInt(json.results.bindings[b][json.head.vars[2]].value))
-	  //if (typeof sortArray[json.results.bindings[b][json.head.vars[3]].value] == 'undefined') { sortArray[json.results.bindings[b][json.head.vars[3]].value] = 0 ; }
-	  //sortArray[json.results.bindings[b][json.head.vars[3]].value] += parseInt(json.results.bindings[b][json.head.vars[2]].value);
-      //}
-      //for (var key in sortArray) {
-	  //sortArray[key] = sortArray[key]/totalWeight;
-	  //console.log(key + " = " + sortArray[key] + '');
-      //}
-      //console.log("=========================================");
-      //return sortArray ;      
   }
 
   
