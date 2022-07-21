@@ -177,7 +177,7 @@ function topicise() {
 
 
     
-	text='<div class="spacer"> </div>';
+    text='<div class="spacer"> </div>';
 	//highlight sentences	
 	for (var m = 0; m < theta.length; m++) {
 		text+='<div class="lines">';
@@ -242,7 +242,45 @@ function btnTopiciseClicked() {
 var sentences;
 </script>
 
-    <style>
+<style> /* For the collapsible sections. */
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.collapsible:after {
+  content: '\002B';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.active:after {
+    content: "\2212";
+}
+
+.content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background-color: #f1f1f1;
+}
+</style>
+
+<style>
 	body {
 	    margin: 20px 50px;
 	}
@@ -382,6 +420,57 @@ var sentences;
       <h2>~Guessing potential RDF vocabularies from natural language texts using LDA~</h2>
     </div>
 
+ <button type="button" class="page-header collapsible">-=Context and Basic Description=-</button>
+ <div class="content" style="height:80%;overflow:auto">
+   <p>
+     On-line availability of text corpora nowadays allow data
+     practitioners to build complex knowledge combining various
+     sources. One common shared challenge lays in the modelisation of
+     intermediate knowledge structures able to gather at once the
+     various topics present in the texts. Practically, practitioners
+     often go through the creation of vocabularies. In order to help
+     these domain experts, we design LOV-ES: a solution able to help
+     them in this creative process, guiding them in the selection and
+     the combination of already existing vocabularies available
+     online. Technically, our solution relies on LDA to detect topics
+     and on the LOV to then propose candidate vocabularies.
+   </p>
+   <p>
+     The proposed architecture performs two main tasks: (1) applying
+     LDA to identify underlying topics of a given text block, and (2)
+     ranking candidate vocab- ularies considering their relevance to
+     the topics. In detail, we rely on the original version of LDA
+     based on two hyperparameters α (controlling the prior distri-
+     bution over topic weights in each document) and β (setting the
+     prior distribution over word weights in each topic), respectively
+     set to 0.1 and 0.01. Each topic word bag resulting from applying
+     LDA is then used to build a SPARQL query aim- ing at extracting
+     candidate vocabularies. Typically, the words are given to the
+     SPARQL endpoint taking advantage of the VALUES variable passing
+     method as presented schematically below:
+   </p>
+   <pre>
+     SELECT ?word ?voc WHERE {
+     VALUES ?word { "word1" "word2" "word3" } # Word list from an LDA bag.
+     ?voc a lod:Vocabulary . ?voc dcterms:description ?description . [...]
+     FILTER ( CONTAINS ( STR(?description),?word ) ) }
+   </pre>
+   <p>
+     The rest of the query then returns candidate vocabularies ?voc if
+     occurrences of ?word are present within the vocabulary
+     description, making the assumption that specific words would be
+     present to describe more generic vocabularies. Once candidate
+     vocabularies are obtained we sort them according to a metric
+     described in our article to display them by descreasing order.
+   </p>
+   </div>
+    
+ <button type="button" class="page-header collapsible">-=Demonstrator=-</button>
+<div class="content" style="height:80%;overflow:auto">
+  
+
+
+    
     <div class="row">
       <div class="column left">
 	<h2 class="page-header">Text to be structured</h2>
@@ -426,7 +515,8 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
 	<div class="spacer"> </div>
 	<div id="topiccloud"></div>
 	<br/>
-	<div id="output">
+	<button type="button" class="page-header collapsible">Details per sentences</button><div class="content">
+	<div id="output">Nothing for the moment...</div>
 	</div>
 	
       </div>
@@ -437,7 +527,7 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
 	</div>
       </div>
     </div>
-    
+  </div>
     <br/>
     <br/>
 
@@ -450,4 +540,24 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
   
 
 </body>
+
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    } 
+  });
+}
+
+document.querySelector('.collapsible').click();
+</script>
+
 </html>
