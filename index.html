@@ -685,8 +685,13 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
 			
 			return graph;
 		}
-		
-	  	      
+
+	      // function zoomed() {
+	      //  	  graph.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+	      // }
+	      // var zoom = d3.behavior.zoom().scaleExtent([1,10]).on("zoom", zoomed);
+
+	      
 		function update(){
 			// ==================== Add Marker ====================
 			svg.append("svg:defs").selectAll("marker")
@@ -701,9 +706,20 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
 			    .attr("orient", "auto")
 			  .append("svg:polyline")
 			.attr("points", "0,-5 10,0 0,5")
-		        //.call(zoom)
+		        //.call(d3.behavior.zoom().on("zoom", redraw))
+		    //.call(zoom)
+		    // .call(d3.behavior.zoom().on("zoom", function () {
+        //   svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+        // }))
 		    ;
 
+	      // var zoom = d3.behavior.zoom()
+	      // 	  .scaleExtent([1, 10])
+	      // 	  .on("zoom", zoomed);
+
+	      // function zoomed() {
+	      // 	  container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+	      // }
 
 		    
 			// ==================== Add Links ====================
@@ -804,7 +820,12 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
 	      //console.log(triples);
 	      var svg = d3.select("#svg-body").append("svg")
 	 	  .attr("width", 800)
-	 	  .attr("height", 600);
+	 	  .attr("height", 600)
+	          //.attr("scale",30)
+		  .call(d3.behavior.zoom().on("zoom", function () {
+		      svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+		  }))
+		  .append("g");
 	      var force = d3.layout.force().size([800, 600]);
 	      var graph = triplesToGraph(triples);
 
@@ -830,7 +851,7 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
 	  //httpGetAsync("https://lov.linkeddata.es/dataset/lov/vocabs/af/versions/2008-06-23.n3",displayRDF);
 	</script>
 
-<!--<span style="cursor:pointer" onclick="openNav('https://www.ica.org/standards/RiC/ontology','https://lov.linkeddata.es/dataset/lov/vocabs/ebg/versions/2020-02-11.n3')"></span>-->
+<!-- <span style="cursor:pointer" onclick="openNav('https://data.nasa.gov/ontologies/atmonto/data#','https://lov.linkeddata.es/dataset/lov/vocabs/atd/versions/2018-03-28.n3')">foo</span> -->
 
 <div id="myNav" class="overlay" style="z-index: 100">
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
@@ -841,7 +862,7 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
     <div id="overlay-description"</div>
   </div>
 </div>
-  
+
 </body>
 
 
