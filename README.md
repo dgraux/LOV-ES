@@ -20,6 +20,13 @@ available online. Technically, our solution relies on LDA to detect
 topics and on the LOV to then propose candidate vocabularies.
 
 
+Online demonstrator
+-------------------
+
+An online demonstrator of the interface is available at
+<https://dgraux.github.io/LOV-ES/>.
+
+
 Repository files
 ----------------
 
