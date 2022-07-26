@@ -242,6 +242,201 @@ function btnTopiciseClicked() {
 var sentences;
 </script>
 
+
+	<style type="text/css">
+		.node {
+		  stroke: #fff;
+		  fill:#ddd;
+		  stroke-width: 1.5px;
+		}
+
+		.link {
+		  stroke: #999;
+		  stroke-opacity: .6;
+		  stroke-width: 1px;
+		}
+
+		marker {
+			stroke: #999;
+			fill:rgba(124,240,10,0);
+		}
+
+		.node-text {
+		  font: 11px sans-serif;
+		  fill:black;
+		}
+
+		.link-text {
+		  font: 9px sans-serif;
+		  fill:grey;
+		}
+		
+		svg{
+			border:1px solid black;
+		}
+	</style>
+	
+    <script>
+		// function filterNodesById(nodes,id){
+		// 	return nodes.filter(function(n) { return n.id === id; });
+		// }
+		
+		// function filterNodesByType(nodes,value){
+		// 	return nodes.filter(function(n) { return n.type === value; });
+		// }
+		
+		// function triplesToGraph(triples){
+		
+		// 	svg.html("");
+		// 	//Graph
+		// 	var graph={nodes:[], links:[]};
+			
+		// 	//Initial Graph from triples
+		// 	triples.forEach(function(triple){
+		// 		var subjId = triple.subject;
+		// 		var predId = triple.predicate;
+		// 		var objId = triple.object;
+				
+		// 		var subjNode = filterNodesById(graph.nodes, subjId)[0];
+		// 		var objNode  = filterNodesById(graph.nodes, objId)[0];
+				
+		// 		if(subjNode==null){
+		// 			subjNode = {id:subjId, label:subjId, weight:1, type:"node"};
+		// 			graph.nodes.push(subjNode);
+		// 		}
+				
+		// 		if(objNode==null){
+		// 			objNode = {id:objId, label:objId, weight:1, type:"node"};
+		// 			graph.nodes.push(objNode);
+		// 		}
+				
+		// 		var predNode = {id:predId, label:predId, weight:1, type:"pred"} ;
+		// 		graph.nodes.push(predNode);
+				
+		// 		var blankLabel = "";
+				
+		// 		graph.links.push({source:subjNode, target:predNode, predicate:blankLabel, weight:1});
+		// 		graph.links.push({source:predNode, target:objNode, predicate:blankLabel, weight:1});
+				
+				
+		// 	});
+			
+		// 	return graph;
+		// }
+		
+		
+		// function update(){
+		// 	// ==================== Add Marker ====================
+		// 	svg.append("svg:defs").selectAll("marker")
+		// 	    .data(["end"])
+		// 	  .enter().append("svg:marker")
+		// 	    .attr("id", String)
+		// 	    .attr("viewBox", "0 -5 10 10")
+		// 	    .attr("refX", 30)
+		// 	    .attr("refY", -0.5)
+		// 	    .attr("markerWidth", 6)
+		// 	    .attr("markerHeight", 6)
+		// 	    .attr("orient", "auto")
+		// 	  .append("svg:polyline")
+		// 	    .attr("points", "0,-5 10,0 0,5")
+		// 	    ;
+				
+		// 	// ==================== Add Links ====================
+		// 	var links = svg.selectAll(".link")
+		// 						.data(graph.links)
+		// 						.enter()
+		// 						.append("line")
+		// 							.attr("marker-end", "url(#end)")
+		// 							.attr("class", "link")
+		// 							.attr("stroke-width",1)
+		// 					;//links
+			
+		// 	// ==================== Add Link Names =====================
+		// 	var linkTexts = svg.selectAll(".link-text")
+		//                 .data(graph.links)
+		//                 .enter()
+		//                 .append("text")
+		// 					.attr("class", "link-text")
+		// 					.text( function (d) { return d.predicate; })
+		// 				;
+
+		// 		//linkTexts.append("title")
+		// 		//		.text(function(d) { return d.predicate; });
+						
+		// 	// ==================== Add Link Names =====================
+		// 	var nodeTexts = svg.selectAll(".node-text")
+		//                 .data(graph.nodes)
+		//                 .enter()
+		//                 .append("text")
+		// 					.attr("class", "node-text")
+		// 					.text( function (d) { return d.label; })
+		// 				;
+
+		// 		//nodeTexts.append("title")
+		// 		//		.text(function(d) { return d.label; });
+			
+		// 	// ==================== Add Node =====================
+		// 	var nodes = svg.selectAll(".node")
+		// 						.data(filterNodesByType(graph.nodes, "node"))
+		// 						.enter()
+		// 						.append("circle")
+		// 							.attr("class", "node")
+		// 							.attr("r",8)
+		// 							.call(force.drag)
+		// 					;//nodes
+							
+		// 	// ==================== Add Predicate =====================
+		// 	/*var preds = svg.selectAll(".node")
+		// 						.data(graph.preds)
+		// 						.enter()
+		// 						.append("circle")
+		// 							.attr("class", "node")
+		// 							.attr("r",1)
+		// 							//.call(force.drag)*/
+		// 					;//nodes
+		
+		// 	// ==================== Force ====================
+		// 	force.on("tick", function() {
+		// 		nodes
+		// 			.attr("cx", function(d){ return d.x; })
+		// 			.attr("cy", function(d){ return d.y; })
+		// 			;
+				
+		// 		links
+		// 			.attr("x1", 	function(d)	{ return d.source.x; })
+		// 	        .attr("y1", 	function(d) { return d.source.y; })
+		// 	        .attr("x2", 	function(d) { return d.target.x; })
+		// 	        .attr("y2", 	function(d) { return d.target.y; })
+		// 	       ;
+				   
+		// 		nodeTexts
+		// 			.attr("x", function(d) { return d.x + 12 ; })
+		// 			.attr("y", function(d) { return d.y + 3; })
+		// 			;
+					
+
+		// 		linkTexts
+		// 			.attr("x", function(d) { return 4 + (d.source.x + d.target.x)/2  ; })
+		// 			.attr("y", function(d) { return 4 + (d.source.y + d.target.y)/2 ; })
+		// 			;
+		// 	});
+			
+		// 	// ==================== Run ====================
+		// 	force
+		//       .nodes(graph.nodes)
+		//       .links(graph.links)
+		// 	  .charge(-500)
+		// 	  .linkDistance(50)
+		//       .start()
+		// 	  ;
+		// }
+		
+		
+	</script>
+
+
+
+
 <style> /* For the collapsible sections. */
 .collapsible {
   background-color: #777;
@@ -410,6 +605,61 @@ var sentences;
 	}
     </style>
 
+
+<style>
+
+.overlay {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0, 0.9);
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+.overlay-content {
+  position: relative;
+  top: 25%;
+  width: 100%;
+  text-align: center;
+  margin-top: 30px;
+}
+
+.overlay a {
+  padding: 8px;
+  text-decoration: none;
+  font-size: 36px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.overlay a:hover, .overlay a:focus {
+  color: #f1f1f1;
+}
+
+.overlay .closebtn {
+  position: absolute;
+  top: 20px;
+  right: 45px;
+  font-size: 60px;
+}
+
+@media screen and (max-height: 450px) {
+  .overlay a {font-size: 20px}
+  .overlay .closebtn {
+  font-size: 40px;
+  top: 15px;
+  right: 35px;
+  }
+}
+</style>
+
+
 </head>
 
 
@@ -537,8 +787,281 @@ If flying with just a carry-on isn't for you, don't check your bag more than thr
 	Last update: July 2022
       </div>
     </footer>
-  
 
+  <h1>Visualizing RDF using D3 : Multiple Links between a Node Pair</h1>
+  <!-- <div id="svg-body" class="panel-body"></div> -->
+  	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script> -->
+	<script src="js/d3.v3.min.js"></script>
+	<script src="js/n3.min.js"></script>
+	<!-- <script src="js/sweetalert.min.js"></script> -->
+	<script>
+	  function displayRDF(json) {
+
+		function filterNodesById(nodes,id){
+			return nodes.filter(function(n) { return n.id === id; });
+		}
+		
+		function filterNodesByType(nodes,value){
+			return nodes.filter(function(n) { return n.type === value; });
+		}
+
+	      
+		function triplesToGraph(triples){
+
+			svg.html("");
+			//Graph
+			var graph={nodes:[], links:[]};
+			
+			//Initial Graph from triples
+			triples.forEach(function(triple){
+				var subjId = triple.subject;
+				var predId = triple.predicate;
+				var objId = triple.object;
+				
+				var subjNode = filterNodesById(graph.nodes, subjId)[0];
+				var objNode  = filterNodesById(graph.nodes, objId)[0];
+				
+				if(subjNode==null){
+					subjNode = {id:subjId, label:subjId, weight:1, type:"node"};
+					graph.nodes.push(subjNode);
+				}
+				
+				if(objNode==null){
+					objNode = {id:objId, label:objId, weight:1, type:"node"};
+					graph.nodes.push(objNode);
+				}
+				
+				var predNode = {id:predId, label:predId, weight:1, type:"pred"} ;
+				graph.nodes.push(predNode);
+				
+				var blankLabel = "";
+				
+				graph.links.push({source:subjNode, target:predNode, predicate:blankLabel, weight:1});
+				graph.links.push({source:predNode, target:objNode, predicate:blankLabel, weight:1});
+				
+				
+			});
+			
+			return graph;
+		}
+		
+	      var zoom = d3.behavior.zoom()
+    .scaleExtent([1, 10])
+    .on("zoom", zoomed);
+
+	      function zoomed() {
+  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
+	      
+		function update(){
+			// ==================== Add Marker ====================
+			svg.append("svg:defs").selectAll("marker")
+			    .data(["end"])
+			  .enter().append("svg:marker")
+			    .attr("id", String)
+			    .attr("viewBox", "0 -5 10 10")
+			    .attr("refX", 30)
+			    .attr("refY", -0.5)
+			    .attr("markerWidth", 6)
+			    .attr("markerHeight", 6)
+			    .attr("orient", "auto")
+			  .append("svg:polyline")
+			.attr("points", "0,-5 10,0 0,5")
+		        .call(zoom)
+		    ;
+
+
+		    
+			// ==================== Add Links ====================
+			var links = svg.selectAll(".link")
+								.data(graph.links)
+								.enter()
+								.append("line")
+									.attr("marker-end", "url(#end)")
+									.attr("class", "link")
+									.attr("stroke-width",1)
+							;//links
+			
+			// ==================== Add Link Names =====================
+			var linkTexts = svg.selectAll(".link-text")
+		                .data(graph.links)
+		                .enter()
+		                .append("text")
+							.attr("class", "link-text")
+							.text( function (d) { return d.predicate; })
+						;
+
+				//linkTexts.append("title")
+				//		.text(function(d) { return d.predicate; });
+						
+			// ==================== Add Link Names =====================
+			var nodeTexts = svg.selectAll(".node-text")
+		                .data(graph.nodes)
+		                .enter()
+		                .append("text")
+							.attr("class", "node-text")
+							.text( function (d) { return d.label; })
+						;
+
+				//nodeTexts.append("title")
+				//		.text(function(d) { return d.label; });
+			
+			// ==================== Add Node =====================
+			var nodes = svg.selectAll(".node")
+								.data(filterNodesByType(graph.nodes, "node"))
+								.enter()
+								.append("circle")
+									.attr("class", "node")
+									.attr("r",8)
+									.call(force.drag)
+							;//nodes
+							
+			// ==================== Add Predicate =====================
+			/*var preds = svg.selectAll(".node")
+								.data(graph.preds)
+								.enter()
+								.append("circle")
+									.attr("class", "node")
+									.attr("r",1)
+									//.call(force.drag)*/
+							;//nodes
+		
+			// ==================== Force ====================
+			force.on("tick", function() {
+				nodes
+					.attr("cx", function(d){ return d.x; })
+					.attr("cy", function(d){ return d.y; })
+					;
+				
+				links
+					.attr("x1", 	function(d)	{ return d.source.x; })
+			        .attr("y1", 	function(d) { return d.source.y; })
+			        .attr("x2", 	function(d) { return d.target.x; })
+			        .attr("y2", 	function(d) { return d.target.y; })
+			       ;
+				   
+				nodeTexts
+					.attr("x", function(d) { return d.x + 12 ; })
+					.attr("y", function(d) { return d.y + 3; })
+					;
+					
+
+				linkTexts
+					.attr("x", function(d) { return 4 + (d.source.x + d.target.x)/2  ; })
+					.attr("y", function(d) { return 4 + (d.source.y + d.target.y)/2 ; })
+					;
+			});
+			
+			// ==================== Run ====================
+			force
+		      .nodes(graph.nodes)
+		      .links(graph.links)
+			  .charge(-500)
+			  .linkDistance(50)
+		      .start()
+			  ;
+		}
+
+	      var triples = [];
+	      var parser = new N3.Parser({ format: 'N3' });
+	      var triples = parser.parse(json).map(quad =>
+		  ({subject:quad._subject.value,predicate:quad._predicate.value,object:quad._object.value})
+	      );
+	      console.log(triples);
+		  // json,
+		  // 			  (error, quad, prefixes) => {
+		  // 			      //var triples = [];
+		  // 			      if (quad) {
+		  // 				  //console.log({subject:quad._subject.value,predicate:quad._predicate.value,object:quad._object.value});
+		  // 				  triples.push({subject:quad._subject.value,predicate:quad._predicate.value,object:quad._object.value});
+		  // 				  console.log(triples);
+		  // 			      }
+		  // 			      else {
+		  // 				  console.log("# That's all, folks!"); //, prefixes);
+		  // 			      }
+		  // 			      return triples;
+		  // 			  });
+	      //console.log("foo"); sleep(2000); console.log("bar"); console.log(triples);
+	      var svg = d3.select("#svg-body").append("svg")
+	 	  .attr("width", 800)
+	 	  .attr("height", 600);
+	      var force = d3.layout.force().size([800, 600]);
+	      var graph = triplesToGraph(triples);
+
+	      //var zoom = d3.behavior.zoom().scaleExtent([1,10]).on("zoom", zoomed);
+    
+	      //svg.call(zoom);
+	      
+	      update();
+	      
+	  }
+
+	  function httpGetAsync(theUrl, callback) {
+	      var xmlHttp = new XMLHttpRequest();
+	      xmlHttp.onreadystatechange = function() { 
+		  if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+		      callback(xmlHttp.responseText);
+	      }
+	      xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+	      xmlHttp.send(null);
+	  }
+
+	  //httpGetAsync("https://lov.linkeddata.es/dataset/lov/vocabs/ebg/versions/2020-02-11.n3",displayRDF);
+	  //httpGetAsync("https://lov.linkeddata.es/dataset/lov/vocabs/af/versions/2008-06-23.n3",displayRDF);
+
+
+
+
+	  
+	</script>
+  <script>
+  	// var triples = [
+  	// 		{subject:"ex:ThaiLand", 	predicate:"ex:hasFood", 	object:"ex:TomYumKung"},
+	// 		{subject:"ex:TomYumKung", 	predicate:"ex:isFoodOf", 	object:"ex:ThaiLand"},
+  	// 		{subject:"ex:TomYumKung", 	predicate:"rdf:type", 		object:"ex:SpicyFood"},
+  	// 		{subject:"ex:TomYumKung", 	predicate:"ex:includes", 	object:"ex:shrimp"},
+  	// 		{subject:"ex:TomYumKung", 	predicate:"ex:includes", 	object:"ex:chilly"},
+	// 		{subject:"ex:TomYumKung", 	predicate:"ex:requires", 	object:"ex:chilly"},
+	// 		{subject:"ex:TomYumKung", 	predicate:"ex:hasSpicy", 	object:"ex:chilly"},
+  	// 		{subject:"ex:TomYumKung", 	predicate:"ex:includes", 	object:"ex:lemon"},
+  	// 		{subject:"ex:lemon", 		predicate:"ex:hasTaste", 	object:"ex:sour"},
+  	// 		{subject:"ex:chilly", 		predicate:"ex:hasTaste", 	object:"ex:spicy"}
+  	// 	];
+		
+	// var svg = d3.select("#svg-body").append("svg")
+	// 			.attr("width", 800)
+	// 			.attr("height", 600)
+	// 			;
+				
+	// var force = d3.layout.force().size([800, 600]);
+	
+	// var graph = triplesToGraph(triples);
+	
+	// update();
+
+
+  </script>
+
+<span style="cursor:pointer" onclick="openNav('https://lov.linkeddata.es/dataset/lov/vocabs/ebg/versions/2020-02-11.n3')">
+<h2>Fullscreen Overlay Nav Example</h2>
+<p>Click on the element below to open the fullscreen overlay navigation menu.</p>
+<p>In this example, the navigation menu will slide in, from left to right:</p>
+&#9776; open</span>
+
+<div id="myNav" class="overlay">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <div class="overlay-content">
+    <div id="svg-body" class="panel-body"></div>
+    <p> On-line availability of text corpora nowadays allow data practitioners to build complex knowledge combining various sources. One common shared challenge lays in the modelisation of intermediate knowledge structures able to gather at once the various topics present in the texts. Practically, practitioners often go through the creation of vocabularies. In order to help these domain experts, we design LOV-ES: a solution able to help them in this creative process, guiding them in the selection and the combination of already existing vocabularies available online. Technically, our solution relies on LDA to detect topics and on the LOV to then propose candidate vocabularies.
+
+The proposed architecture performs two main tasks: (1) applying LDA to identify underlying topics of a given text block, and (2) ranking candidate vocab- ularies considering their relevance to the topics. In detail, we rely on the original version of LDA based on two hyperparameters α (controlling the prior distri- bution over topic weights in each document) and β (setting the prior distribution over word weights in each topic), respectively set to 0.1 and 0.01. Each topic word bag resulting from applying LDA is then used to build a SPARQL query aim- ing at extracting candidate vocabularies. Typically, the words are given to the SPARQL endpoint taking advantage of the VALUES variable passing method as presented schematically below: </p>
+    <a href="#">Services</a>
+    <a href="#">Clients</a>
+    <a href="#">Contact</a>
+  </div>
+</div>
+  
 </body>
 
 <script>
@@ -558,6 +1081,19 @@ for (i = 0; i < coll.length; i++) {
 }
 
 document.querySelector('.collapsible').click();
+</script>
+
+
+<script>
+  function openNav(url) {
+      httpGetAsync(url,displayRDF);
+      document.getElementById("myNav").style.width = "55%";
+  }
+
+  function closeNav() {
+      document.getElementById("svg-body").innerHTML = "";
+      document.getElementById("myNav").style.width = "0%";
+  }
 </script>
 
 </html>
